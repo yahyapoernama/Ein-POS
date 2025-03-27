@@ -7,6 +7,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- [Favicon] icon -->
     <link rel="icon" href="{{ asset('assets/images/favicon/favicon.ico') }}" type="image/x-icon">
@@ -23,6 +24,7 @@
 
     <link rel="stylesheet" href="{{ asset('assets/libs/datatables/datatables.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/libs/base/css/plugins/dataTables.bootstrap5.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/libs/animate/animate.min.css') }}">
 
     <!-- [Template CSS Files] -->
     <link rel="stylesheet" href="{{ asset('assets/libs/base/css/style.css') }}" id="main-style-link">
@@ -39,12 +41,35 @@
         .row {
             padding-top: 0 !important;
         }
-        thead > tr > th {
+
+        thead>tr>th {
             font-weight: bold !important;
             color: white !important;
             background-color: #343A40 !important;
             border: 1px solid #343A40 !important;
         }
+
+        .form-control:focus {
+            background-color: transparent;
+            box-shadow: none;
+            border-color: black;
+        }
+
+        .form-control:hover {
+            background-color: transparent;
+        }
+
+        .swal2-popup .swal2-styled:focus {
+            box-shadow: none !important;
+        }
+
+        .swal2-container {
+            z-index: 9999 !important;
+        }
+
+        /* div.dt-processing {
+            display: none !important;
+        } */
     </style>
     @stack('styles')
 </head>
@@ -124,6 +149,76 @@
     <script src="{{ asset('assets/libs/base/js/fonts/custom-font.js') }}"></script>
     <script src="{{ asset('assets/libs/base/js/pcoded.js') }}"></script>
     <script src="{{ asset('assets/libs/base/js/plugins/feather.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/sweetalert2/sweetalert2.all.min.js') }}"></script>
+    <script>
+        $(document).ready(function() {
+            // Set CSRF Token
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            // Handle Edit with AJAX
+            $(document).on('submit', '.edit-form', function(e) {
+                e.preventDefault();
+                let url = $(this).attr('action');
+                let data = $(this).serialize();
+
+                $.ajax({
+                    url: url,
+                    type: "PUT",
+                    data: data,
+                    success: function(response) {
+                        Swal.fire("Updated!", response.message, "success");
+                        $('#editModal').modal('hide');
+                        $('.datatable').DataTable().ajax.reload();
+                    },
+                    error: function() {
+                        Swal.fire("Oops!", "An error occurred", "error");
+                    }
+                });
+            });
+
+            // Handle Delete with AJAX
+            $(document).on('click', '.delete-btn', function() {
+                let url = $(this).data('route');
+
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "Deleted data cannot be restored!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#6c757d",
+                    confirmButtonText: "Yes, delete it!",
+                    allowOutsideClick: false,
+                    showCloseButton: true,
+                    showClass: {
+                        popup: 'animate__animated animate__fadeIn animate__faster'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOut animate__faster'
+                    }
+                }).then((result) => {
+                    console.log(url);
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: url,
+                            type: "DELETE",
+                            success: function(response) {
+                                Swal.fire("Deleted!", response.message, "success");
+                                $('.datatable').DataTable().ajax.reload();
+                            },
+                            error: function() {
+                                Swal.fire("Oops!", "An error occurred", "error");
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
     @stack('scripts')
 </body>
 <!-- [Body] end -->

@@ -15,8 +15,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     Route::prefix('categories')->name('categories.')->group(function () {
-        Route::get('/', [CategoryController::class, 'index'])->name('index');
-        Route::get('/get-data', [CategoryController::class, 'getData'])->name('getData');
+        Route::resource('/', CategoryController::class)->parameters(['' => 'id']);
+        Route::prefix('utils')->name('utils.')->group(function () {
+            Route::get('/get-data', [CategoryController::class, 'getData'])->name('getData');
+        });
     });
 });
-
