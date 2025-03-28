@@ -19,7 +19,7 @@
                             data-bs-target="#createModal">
                             <i class="ti ti-circle-plus me-2"></i> <span class="align-middle">Add Data</span>
                         </button>
-                        <button class="btn btn-primary me-1 d-flex align-items-center" id="reloadTable">
+                        <button class="btn btn-dark me-1 d-flex align-items-center" id="reloadTable">
                             <i class="ti ti-refresh me-2"></i> <span class="align-middle">Reload Table</span>
                         </button>
                     </div>
