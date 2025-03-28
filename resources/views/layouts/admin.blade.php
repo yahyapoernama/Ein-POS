@@ -18,7 +18,7 @@
     <!-- [Feather Icons] https://feathericons.com -->
     <link rel="stylesheet" href="{{ asset('assets/libs/base/fonts/feather.css') }}">
     <!-- [Font Awesome Icons] https://fontawesome.com/icons -->
-    <link rel="stylesheet" href="{{ asset('assets/libs/base/fonts/fontawesome.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/libs/fontawesome/css/all.min.css') }}">
     <!-- [Material Icons] https://fonts.google.com/icons -->
     <link rel="stylesheet" href="{{ asset('assets/libs/base/fonts/material.css') }}">
 
@@ -67,6 +67,25 @@
             z-index: 9999 !important;
         }
 
+        .ti {
+            display: inline-block;
+        }
+
+        .ti-spin {
+            animation: spin 2s linear infinite;
+            -webkit-animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(1turn);
+            }
+        }
+
         /* div.dt-processing {
             display: none !important;
         } */
@@ -88,8 +107,6 @@
     <!-- [ Header Topbar ] start -->
     @include('admin.layouts.header')
     <!-- [ Header ] end -->
-
-
 
     <!-- [ Main Content ] start -->
     <div class="pc-container">
@@ -159,10 +176,76 @@
                 }
             });
 
+            // Reload Table
+            $(document).on('click', '#reloadTable', function() {
+                let $reloadBtnIcon = $('#reloadTable').find('i');
+                $reloadBtnIcon.addClass('ti-spin');
+                $('.datatable').DataTable().ajax.reload(function() {
+                    $reloadBtnIcon.removeClass('ti-spin');
+                });
+            });
+
+            // Handle Create with AJAX
+            $(document).on('submit', '.create-form', function(e) {
+                e.preventDefault();
+                let url = window.location.href;
+                let data = $(this).serialize();
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: data,
+                    success: function(response) {
+                        if (response.success) {
+                            $('#createModal').modal('hide');
+                            $('.create-form')[0].reset();
+                            $('.datatable').DataTable().ajax.reload();
+                            Swal.fire("Success!", response.message, "success");
+                        } else {
+                            Swal.fire("Oops!", response.message, "error");
+                        }
+                    }
+                });
+            })
+
             // Handle Edit with AJAX
+            $(document).on('click', '.edit-btn', function() {
+                let $btn = $(this);
+                let $icon = $btn.find('i');
+
+                $icon.removeClass('ti-edit').addClass('ti-loader ti-spin');
+
+                let id = $btn.data('id');
+                let url = window.location.href + '/' + id + '/edit';
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(response) {
+                        $icon.removeClass('ti-loader ti-spin').addClass(
+                            'ti-edit'); // Kembalikan ikon
+                        if (response.success) {
+                            $('#editModal').modal('show');
+                            $('.edit-form')[0].reset();
+                            $('.edit-form').data('id', response.data.id);
+
+                            $.each(response.data, function(key, value) {
+                                $('.edit-form').find(`input[name="${key}"]`).val(value);
+                            });
+                        }
+                    },
+                    error: function() {
+                        // Kembalikan ikon jika error
+                        $icon.removeClass('ti-loader ti-spin').addClass('ti-edit');
+                    }
+                });
+            });
+
+            // Handle Update with AJAX
             $(document).on('submit', '.edit-form', function(e) {
                 e.preventDefault();
-                let url = $(this).attr('action');
+                let id = $(this).data('id');
+                let url = window.location.href + '/' + id;
                 let data = $(this).serialize();
 
                 $.ajax({

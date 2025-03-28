@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use App\View\Components\TableActions;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class CategoryController extends Controller
 {
@@ -41,8 +42,8 @@ class CategoryController extends Controller
             DB::beginTransaction();
 
             $request->validate([
-                'name' => 'required',
-                'slug' => 'required',
+                'name' => ['required', Rule::unique('categories')->whereNull('deleted_at')],
+                'slug' => ['required', Rule::unique('categories')->whereNull('deleted_at')],
             ]);
 
             Category::create([
@@ -53,7 +54,7 @@ class CategoryController extends Controller
 
             DB::commit();
 
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => 'Category created successfully']);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
@@ -67,14 +68,21 @@ class CategoryController extends Controller
         return response()->json(['success' => true, 'data' => $category]);
     }
 
+    public function edit($id)
+    {
+        $category = Category::find($id);
+
+        return response()->json(['success' => true, 'data' => $category]);
+    }
+
     public function update(Request $request, $id)
     {
         try {
             DB::beginTransaction();
 
             $request->validate([
-                'name' => 'required',
-                'slug' => 'required',
+                'name' => ['required', Rule::unique('categories')->whereNull('deleted_at')],
+                'slug' => ['required', Rule::unique('categories')->whereNull('deleted_at')],
             ]);
 
             $category = Category::find($id);
@@ -85,7 +93,7 @@ class CategoryController extends Controller
 
             DB::commit();
 
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => 'Category updated successfully']);
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -103,7 +111,7 @@ class CategoryController extends Controller
 
             DB::commit();
 
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => 'Category deleted successfully']);
         } catch (\Exception $e) {
             DB::rollBack();
 

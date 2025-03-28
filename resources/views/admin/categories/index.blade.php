@@ -14,10 +14,15 @@
                     <h5>Categories</h5>
                 </div>
                 <div class="card-body">
-                    <button class="btn btn-success mb-3 d-flex align-items-center" data-bs-toggle="modal"
-                        data-bs-target="#categoryModal">
-                        <i class="ti ti-circle-plus me-2"></i> <span class="align-middle">Add Data</span>
-                    </button>
+                    <div class="d-flex mb-3">
+                        <button class="btn btn-success me-1 d-flex align-items-center" data-bs-toggle="modal"
+                            data-bs-target="#createModal">
+                            <i class="ti ti-circle-plus me-2"></i> <span class="align-middle">Add Data</span>
+                        </button>
+                        <button class="btn btn-primary me-1 d-flex align-items-center" id="reloadTable">
+                            <i class="ti ti-refresh me-2"></i> <span class="align-middle">Reload Table</span>
+                        </button>
+                    </div>
                     <table class="table table-bordered datatable" id="categories-table">
                         <thead>
                             <tr>
@@ -35,15 +40,15 @@
         <!-- [ sample-page ] end -->
     </div>
 
-    <div class="modal fade" id="categoryModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-        aria-labelledby="categoryModalLabel" aria-hidden="true">
+    <div class="modal fade" id="createModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="createModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="categoryModalLabel">Add Data</h5>
+                    <h5 class="modal-title" id="createModalLabel">Add Data</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="categoryForm" method="POST">
+                <form class="create-form" method="POST">
                     <div class="modal-body">
                         @csrf
                         <div class="mb-3">
@@ -114,25 +119,6 @@
                     [1, 'asc']
                 ],
             });
-
-            $('#categoryForm').submit(function(e) {
-                e.preventDefault();
-                $.ajax({
-                    url: '{{ route('admin.categories.store') }}',
-                    type: 'POST',
-                    data: $(this).serialize(),
-                    success: function(response) {
-                        if (response.success) {
-                            $('#categoryModal').modal('hide');
-                            $('#categoryForm')[0].reset();
-                            $('#categories-table').DataTable().ajax.reload();
-                            Swal.fire("Success!", response.message, "success");
-                        } else {
-                            Swal.fire("Oops!", response.message, "error");
-                        }
-                    }}
-                );
-            })
         });
     </script>
 @endpush
