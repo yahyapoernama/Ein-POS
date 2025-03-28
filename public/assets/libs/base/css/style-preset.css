@@ -87,9 +87,9 @@ h2 {
   background-color: RGBA(24, 144, 255, var(--bs-bg-opacity, 1)) !important;
 }
 [data-pc-preset=preset-1] .accordion {
-  --bs-accordion-btn-focus-border-color: #1890ff;
+  --bs-accordion-btn-focus-border-color: #343A40;
   --bs-accordion-btn-focus-box-shadow: 0 0 0 0.2rem rgba(24, 144, 255, 0.25);
-  --bs-accordion-active-color: #1890ff;
+  --bs-accordion-active-color: #343A40;
   --bs-accordion-active-bg: #e8f4ff;
   --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%231890ff'%3e%3cpath fill-rule=' evenodd' d=' M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
 }
@@ -100,8 +100,8 @@ h2 {
   --bs-alert-link-color: #0b457a;
 }
 [data-pc-preset=preset-1] .list-group {
-  --bs-list-group-active-bg: #1890ff;
-  --bs-list-group-active-border-color: #1890ff;
+  --bs-list-group-active-bg: #343A40;
+  --bs-list-group-active-border-color: #343A40;
 }
 [data-pc-preset=preset-1] .list-group-item-primary {
   color: #0e5699;
@@ -111,21 +111,21 @@ h2 {
   --bs-nav-link-hover-color: #1373cc;
 }
 [data-pc-preset=preset-1] .nav-pills {
-  --bs-nav-pills-link-active-bg: #1890ff;
+  --bs-nav-pills-link-active-bg: #343A40;
 }
 [data-pc-preset=preset-1] .pagination {
   --bs-pagination-hover-color: #1373cc;
   --bs-pagination-focus-color: #1373cc;
   --bs-pagination-focus-box-shadow: 0 0 0 0.2rem rgba(24, 144, 255, 0.25);
-  --bs-pagination-active-bg: #1890ff;
-  --bs-pagination-active-border-color: #1890ff;
+  --bs-pagination-active-bg: #343A40;
+  --bs-pagination-active-border-color: #343A40;
 }
 [data-pc-preset=preset-1] .progress {
-  --bs-progress-bar-bg: #1890ff;
+  --bs-progress-bar-bg: #343A40;
 }
 [data-pc-preset=preset-1] .form-check .form-check-input.input-primary:checked {
-  border-color: #1890ff;
-  background-color: #1890ff;
+  border-color: #343A40;
+  background-color: #343A40;
 }
 [data-pc-preset=preset-1] .form-check .form-check-input.input-light-primary:checked {
   border-color: #e8f4ff;
