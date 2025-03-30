@@ -14,12 +14,14 @@ class ModalManager extends Component
      * @param string $editModal
      * @param array $editFields
      */
-    public $editModal, $editFields;
+    public $listModal, $editModal, $editFields;
 
     public function __construct(
-        $editModal,
+        $listModal = null,
+        $editModal = null,
         $editFields = []
     ) {
+        $this->listModal = $listModal;
         $this->editModal = $editModal;
         $this->editFields = $editFields;
     }
@@ -30,6 +32,7 @@ class ModalManager extends Component
     public function render(): View|Closure|string
     {
         return view('components.modal-manager', [
+            'listModal' => $this->listModal,
             'editModal' => $this->editModal,
             'editFields' => $this->editFields,
         ]);

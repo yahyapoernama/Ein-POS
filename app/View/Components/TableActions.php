@@ -11,16 +11,18 @@ class TableActions extends Component
     /**
      * Create a new component instance.
      */
-    public $id, $listButton, $editButton, $deleteButton;
+    public $id, $listButton, $listCount, $editButton, $deleteButton;
 
     public function __construct(
         $id,
         $listButton = null,
+        $listCount = null,
         $editButton = null,
         $deleteButton = null
     ) {
         $this->id = $id;
         $this->listButton = $listButton;
+        $this->listCount = $listCount;
         $this->editButton = $editButton;
         $this->deleteButton = $deleteButton;
     }
@@ -33,6 +35,7 @@ class TableActions extends Component
         return view('components.table-actions', [
             'id' => $this->id,
             'listButton' => $this->listButton,
+            'listCount' => $this->listCount,
             'editButton' => $this->editButton,
             'deleteButton' => $this->deleteButton
         ]);

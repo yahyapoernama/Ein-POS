@@ -23,9 +23,11 @@ class CategoryController extends Controller
         return DataTables::of($data)
             ->addIndexColumn()
             ->addColumn('action', function ($row) {
+                $productCount = $row->products()->count();
                 return (new TableActions(
                     id: $row->id,
                     listButton: true,
+                    listCount: $productCount,
                     editButton: true,
                     deleteButton: true
                 ))->render();

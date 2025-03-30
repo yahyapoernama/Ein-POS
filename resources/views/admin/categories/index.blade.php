@@ -68,7 +68,7 @@
         </div>
     </div>
 
-    <x-modal-manager :editModal="true" :editFields="['name', 'slug']" />
+    <x-modal-manager :listModal="true" :editModal="true" :editFields="['name', 'slug']" />
 @endsection
 
 @push('scripts')
