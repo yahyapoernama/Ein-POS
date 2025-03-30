@@ -11,11 +11,17 @@ class TableActions extends Component
     /**
      * Create a new component instance.
      */
-    public $id, $editRoute, $deleteRoute, $editFields;
+    public $id, $listRoute, $editRoute, $deleteRoute, $editFields;
 
-    public function __construct($id, $editRoute = null, $deleteRoute = null, $editFields = [])
-    {
+    public function __construct(
+        $id,
+        $listRoute = null,
+        $editRoute = null,
+        $deleteRoute = null,
+        $editFields = []
+    ) {
         $this->id = $id;
+        $this->listRoute = $listRoute;
         $this->editRoute = $editRoute;
         $this->deleteRoute = $deleteRoute;
         $this->editFields = $editFields;
@@ -28,6 +34,7 @@ class TableActions extends Component
     {
         return view('components.table-actions', [
             'id' => $this->id,
+            'listRoute' => $this->listRoute,
             'editRoute' => $this->editRoute,
             'deleteRoute' => $this->deleteRoute,
             'editFields' => $this->editFields,
