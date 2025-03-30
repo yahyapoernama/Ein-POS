@@ -74,8 +74,8 @@
                 url: url,
                 type: 'GET',
                 success: function(response) {
-                    $icon.removeClass('ti-loader ti-spin').addClass(
-                        'ti-edit'); // Kembalikan ikon
+                    // Return icon to default
+                    $icon.removeClass('ti-loader ti-spin').addClass('ti-edit');
                     if (response.success) {
                         $('#editModal').modal('show');
                         $('.edit-form')[0].reset();
@@ -87,7 +87,7 @@
                     }
                 },
                 error: function() {
-                    // Kembalikan ikon jika error
+                    // Return icon to default if error
                     $icon.removeClass('ti-loader ti-spin').addClass('ti-edit');
                 }
             });
