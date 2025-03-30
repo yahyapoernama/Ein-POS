@@ -82,7 +82,23 @@
                         $('.edit-form').data('id', response.data.id);
 
                         $.each(response.data, function(key, value) {
-                            $('.edit-form').find(`input[name="${key}"]`).val(value);
+                            // If value is array, set for select2
+                            if (Array.isArray(value)) {
+                                value.forEach(function(item) {
+                                    $('.edit-form').find(
+                                            `select[name="${key}[]"]`)
+                                        .select2("trigger", "select", {
+                                            data: {
+                                                id: item.id,
+                                                text: item.name
+                                            }
+                                        });
+                                });
+                            } else {
+                                // If value is not array, set for regular text input
+                                $('.edit-form').find(`input[name="${key}"]`).val(
+                                    value);
+                            }
                         });
                     }
                 },
@@ -99,17 +115,23 @@
             let id = $(this).data('id');
             let url = window.location.href + '/' + id;
             let data = $(this).serialize();
+            let $btn = $(this).find('button[type="submit"]');
+            let $btnText = $btn.text();
+
+            $btn.html('<i class="ti ti-loader ti-spin"></i>');
 
             $.ajax({
                 url: url,
                 type: "PUT",
                 data: data,
                 success: function(response) {
+                    $btn.text($btnText);
                     Swal.fire("Updated!", response.message, "success");
                     $('#editModal').modal('hide');
                     $('.datatable').DataTable().ajax.reload();
                 },
                 error: function() {
+                    $btn.text($btnText);
                     Swal.fire("Oops!", "An error occurred", "error");
                 }
             });
@@ -164,52 +186,46 @@
     $('.select2-modal').each(function() {
         let select = $(this);
         let url = select.data('url');
-        let width = select.data('width') ? select.data('width') : select.hasClass('w-100') ? '100%' : 'style';
-        let placeholder = select.data('placeholder') ? select.data('placeholder') : 'Select Option';
-        let multiple = select.data('multiple') ? select.data('multiple') : false;
-        let closeOnSelect = multiple ? false : true;
-        if (!url) {
-            select.select2({
-                theme: "bootstrap-5",
-                width: width,
-                placeholder: placeholder,
-                dropdownParent: $('.modal'),
-                multiple: multiple,
-                closeOnSelect: closeOnSelect,
-                allowClear: true,
-            });
-        } else {
-            select.select2({
-                theme: "bootstrap-5",
-                width: width,
-                placeholder: placeholder,
-                dropdownParent: $('.modal'),
-                multiple: multiple,
-                closeOnSelect: closeOnSelect,
-                allowClear: true,
-                ajax: {
-                    url: url,
-                    dataType: 'json',
-                    delay: 250,
-                    data: function(params) {
-                        return {
-                            q: params.term
-                        };
-                    },
-                    processResults: function(data) {
-                        return {
-                            results: $.map(data, function(item) {
-                                return {
-                                    id: item.id,
-                                    text: item.name
-                                };
-                            })
-                        };
-                    },
-                    cache: true
-                }
-            });
+        let width = select.data('width') || (select.hasClass('w-100') ? '100%' : 'resolve');
+        let placeholder = select.data('placeholder') || 'Select Option';
+        let multiple = select.data('multiple') === true || select.data('multiple') === 'true';
+        let closeOnSelect = !multiple;
+
+        let config = {
+            theme: "bootstrap-5",
+            width: width,
+            placeholder: placeholder,
+            dropdownParent: select.closest('.modal'), // Agar tidak keluar dari modal
+            multiple: multiple,
+            closeOnSelect: closeOnSelect,
+            allowClear: true,
+        };
+
+        if (url) {
+            config.ajax = {
+                url: url,
+                dataType: 'json',
+                delay: 250,
+                data: function(params) {
+                    return {
+                        q: params.term
+                    };
+                },
+                processResults: function(data) {
+                    return {
+                        results: $.map(data, function(item) {
+                            return {
+                                id: item.id,
+                                text: item.name
+                            };
+                        })
+                    };
+                },
+                cache: true
+            };
         }
+
+        select.select2(config);
     });
 </script>
 @stack('scripts')

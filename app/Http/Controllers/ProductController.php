@@ -44,17 +44,11 @@ class ProductController extends Controller
                 }
             })
             ->addColumn('action', function ($row) {
-                return null;
-                // TODO: add edit and delete button
-                // return (new TableActions(
-                //     id: $row->id,
-                //     editRoute: 'admin.categories.update',
-                //     deleteRoute: 'admin.categories.destroy',
-                //     editFields: [
-                //         'name' => $row->name,
-                //         'slug' => $row->slug
-                //     ]
-                // ))->render();
+                return (new TableActions(
+                    id: $row->id,
+                    editRoute: 'admin.categories.update',
+                    deleteRoute: 'admin.categories.destroy'
+                ))->render();
             })
             ->rawColumns(['action', 'categories', 'description'])
             ->toJson();
@@ -82,6 +76,41 @@ class ProductController extends Controller
             DB::commit();
 
             return response()->json(['success' => true, 'message' => 'Product created successfully']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function edit($id)
+    {
+        $product = Product::find($id)->load('categories');
+
+        return response()->json(['success' => true, 'data' => $product]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $request->validate([
+                'name' => ['required', Rule::unique('products')->whereNull('deleted_at')->ignore($id, 'id')],
+                'price' => ['required', 'numeric'],
+                'description' => ['nullable', 'string'],
+            ]);
+
+            $product = Product::find($id);
+            $product->name = $request->name;
+            $product->price = $request->price;
+            $product->description = Sanitizer::clean($request->description, 'string');
+            $product->save();
+
+            $product->categories()->sync($request->categories);
+
+            DB::commit();
+
+            return response()->json(['success' => true, 'message' => 'Product updated successfully']);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['success' => false, 'message' => $e->getMessage()]);

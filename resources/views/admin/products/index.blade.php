@@ -63,7 +63,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="categories" class="form-label">Category</label>
-                            <select class="form-select select2-modal" id="categories" name="categories"
+                            <select class="form-select select2-modal" id="categories" name="categories[]"
                                 data-multiple="true" data-placeholder="Select Category"
                                 data-url="{{ route('admin.categories.utils.select2') }}">
                             </select>
@@ -81,6 +81,20 @@
             </div>
         </div>
     </div>
+
+    <x-modal-manager :editModal="true" :editFields="[
+        'name',
+        'price',
+        [
+            'name' => 'categories',
+            'select2' => [
+                'multiple' => 'true',
+                'placeholder' => 'Select Category',
+                'url' => route('admin.categories.utils.select2'),
+            ],
+        ],
+        'description',
+    ]" />
 @endsection
 
 @push('scripts')

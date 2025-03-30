@@ -27,11 +27,7 @@ class CategoryController extends Controller
                     id: $row->id,
                     listRoute: 'admin.categories.show',
                     editRoute: 'admin.categories.update',
-                    deleteRoute: 'admin.categories.destroy',
-                    editFields: [
-                        'name' => $row->name,
-                        'slug' => $row->slug
-                    ]
+                    deleteRoute: 'admin.categories.destroy'
                 ))->render();
             })
             ->toJson();
@@ -82,8 +78,8 @@ class CategoryController extends Controller
             DB::beginTransaction();
 
             $request->validate([
-                'name' => ['required', Rule::unique('categories')->whereNull('deleted_at')],
-                'slug' => ['required', Rule::unique('categories')->whereNull('deleted_at')],
+                'name' => ['required', Rule::unique('categories')->whereNull('deleted_at')->ignore($id, 'id')],
+                'slug' => ['required', Rule::unique('categories')->whereNull('deleted_at')->ignore($id, 'id')],
             ]);
 
             $category = Category::find($id);
