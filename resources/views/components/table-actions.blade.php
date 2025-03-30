@@ -1,18 +1,18 @@
 <div class="">
-    @if ($listRoute)
+    @if ($listButton)
         <button type="button" class="btn btn-sm btn-secondary list-btn" data-id="{{ $id }}">
             <i class="ti ti-list"></i>
         </button>
     @endif
 
-    @if ($editRoute)
+    @if ($editButton)
         <button type="button" class="btn btn-sm btn-warning edit-btn" data-id="{{ $id }}">
             <i class="ti ti-edit"></i>
         </button>
     @endif
 
-    @if ($deleteRoute)
-        <button class="btn btn-sm btn-danger delete-btn" data-route="{{ route($deleteRoute, $id) }}">
+    @if ($deleteButton)
+        <button class="btn btn-sm btn-danger delete-btn" data-id="{{ $id }}">
             <i class="ti ti-trash"></i>
         </button>
     @endif

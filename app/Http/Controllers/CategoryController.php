@@ -25,9 +25,9 @@ class CategoryController extends Controller
             ->addColumn('action', function ($row) {
                 return (new TableActions(
                     id: $row->id,
-                    listRoute: 'admin.categories.show',
-                    editRoute: 'admin.categories.update',
-                    deleteRoute: 'admin.categories.destroy'
+                    listButton: true,
+                    editButton: true,
+                    deleteButton: true
                 ))->render();
             })
             ->toJson();

@@ -46,8 +46,8 @@ class ProductController extends Controller
             ->addColumn('action', function ($row) {
                 return (new TableActions(
                     id: $row->id,
-                    editRoute: 'admin.categories.update',
-                    deleteRoute: 'admin.categories.destroy'
+                    editButton: true,
+                    deleteButton: true
                 ))->render();
             })
             ->rawColumns(['action', 'categories', 'description'])
@@ -111,6 +111,23 @@ class ProductController extends Controller
             DB::commit();
 
             return response()->json(['success' => true, 'message' => 'Product updated successfully']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $product = Product::find($id);
+            $product->delete();
+
+            DB::commit();
+
+            return response()->json(['success' => true, 'message' => 'Product deleted successfully']);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['success' => false, 'message' => $e->getMessage()]);

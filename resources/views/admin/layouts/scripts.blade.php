@@ -139,7 +139,8 @@
 
         // Handle Delete with AJAX
         $(document).on('click', '.delete-btn', function() {
-            let url = $(this).data('route');
+            let id = $(this).data('id');
+            let url = window.location.href + '/' + id;
 
             Swal.fire({
                 title: "Are you sure?",
