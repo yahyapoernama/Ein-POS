@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Product extends Model
 {
@@ -16,6 +17,15 @@ class Product extends Model
         'description',
         'price',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($product) {
+            $product->uuid = (string) Str::uuid(); // Generate UUID
+        });
+    }
 
     public function categories()
     {

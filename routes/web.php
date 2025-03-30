@@ -10,14 +10,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
     })->name('dashboard');
 
     Route::prefix('products')->name('products.')->group(function () {
-        Route::get('/', [ProductController::class, 'index'])->name('index');
-        Route::get('/get-data', [ProductController::class, 'getData'])->name('getData');
+        Route::resource('/', ProductController::class)->parameters(['' => 'id']);
+        Route::prefix('utils')->name('utils.')->group(function () {
+            Route::get('/get-data', [ProductController::class, 'getData'])->name('getData');
+        });
     });
 
     Route::prefix('categories')->name('categories.')->group(function () {
         Route::resource('/', CategoryController::class)->parameters(['' => 'id']);
         Route::prefix('utils')->name('utils.')->group(function () {
             Route::get('/get-data', [CategoryController::class, 'getData'])->name('getData');
+            Route::get('/select2', [CategoryController::class, 'select2'])->name('select2');
         });
     });
 });

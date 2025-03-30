@@ -25,6 +25,7 @@ class CategoryController extends Controller
             ->addColumn('action', function ($row) {
                 return (new TableActions(
                     id: $row->id,
+                    listRoute: 'admin.categories.show',
                     editRoute: 'admin.categories.update',
                     deleteRoute: 'admin.categories.destroy',
                     editFields: [
@@ -117,5 +118,16 @@ class CategoryController extends Controller
 
             return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
         }
+    }
+
+    public function select2(Request $request)
+    {
+        $query = $request->get('q');
+        $categories = Category::where('name', 'ilike', '%' . $query . '%')
+            ->orWhere('slug', 'ilike', '%' . $query . '%')
+            ->select('id', 'name')
+            ->get();
+
+        return response()->json($categories);
     }
 }
