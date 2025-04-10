@@ -61,52 +61,89 @@
         });
 
         // Handle Edit with AJAX
-        $(document).on('click', '.edit-btn', function() {
-            let $btn = $(this);
-            let $icon = $btn.find('i');
+        $(document).on('click', '.edit-btn', function editButtonHandler(e) {
+            // Get the button element
+            const $button = $(this);
 
+            // Get the icon element
+            const $icon = $button.find('i');
+
+            // Get the ID from the data attribute
+            const id = $button.data('id');
+
+            // Construct the edit URL
+            const url = `${window.location.href}/${id}/edit`;
+
+            // Show the loading icon
             $icon.removeClass('ti-edit').addClass('ti-loader ti-spin');
 
-            let id = $btn.data('id');
-            let url = window.location.href + '/' + id + '/edit';
-
+            // Make the AJAX request
             $.ajax({
-                url: url,
-                type: 'GET',
-                success: function(response) {
-                    // Return icon to default
+                    url,
+                    type: 'GET'
+                })
+                .done((response) => {
+                    // Hide the loading icon
                     $icon.removeClass('ti-loader ti-spin').addClass('ti-edit');
-                    if (response.success) {
-                        $('#editModal').modal('show');
-                        $('.edit-form')[0].reset();
-                        $('.edit-form').data('id', response.data.id);
 
-                        $.each(response.data, function(key, value) {
-                            // If value is array, set for select2
-                            if (Array.isArray(value)) {
-                                value.forEach(function(item) {
-                                    $('.edit-form').find(
-                                            `select[name="${key}[]"]`)
-                                        .select2("trigger", "select", {
-                                            data: {
-                                                id: item.id,
-                                                text: item.name
-                                            }
-                                        });
-                                });
-                            } else {
-                                // If value is not array, set for regular text input
-                                $('.edit-form').find(`input[name="${key}"]`).val(
-                                    value);
-                            }
-                        });
+                    // Check if the response is valid
+                    if (!response.success) {
+                        // Show the error message
+                        Swal.fire("Oops!", response.message, "error");
+                        return;
                     }
-                },
-                error: function() {
-                    // Return icon to default if error
+
+                    // Get the data from the response
+                    const {
+                        data
+                    } = response;
+
+                    // Check if the data exists
+                    if (!data) {
+                        // Show the error message
+                        Swal.fire("Oops!", "Data not found", "error");
+                        return;
+                    }
+
+                    // Show the edit modal
+                    $('#editModal').modal('show');
+
+                    // Reset the edit form
+                    $('.edit-form')[0].reset();
+
+                    // Set the ID to the form
+                    $('.edit-form').data('id', data.id);
+
+                    // Fill the form fields with the data
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (Array.isArray(value)) {
+                            // Select the items in the select2
+                            const select = $('.edit-form').find(`select[name="${key}[]"]`);
+                            value.forEach((item) =>
+                                select.select2("trigger", "select", {
+                                    data: {
+                                        id: item.id,
+                                        text: item.name
+                                    },
+                                })
+                            );
+                        } else {
+                            // Set the value of the input field
+                            $('.edit-form').find(`input[name="${key}"]`).val(value);
+                        }
+                    });
+                })
+                .fail((xhr, status, error) => {
+                    // Hide the loading icon
                     $icon.removeClass('ti-loader ti-spin').addClass('ti-edit');
-                }
-            });
+
+                    // Show the error message
+                    const errorMessage = `${xhr.status} ${xhr.statusText}`;
+                    if (xhr.responseJSON) {
+                        errorMessage += `: ${xhr.responseJSON.message}`;
+                    }
+                    Swal.fire("Oops!", errorMessage, "error");
+                });
         });
 
         // Handle Update with AJAX
@@ -239,17 +276,62 @@
                 });
             }
         });
+    
+        // Reset form when modal is closed
+        // This event is triggered when the modal is closed. We need to reset the form
+        // so that the values are cleared and the select2 is reset.
+        $('.modal').on('hidden.bs.modal', function(event) {
+            const $modal = $(event.target);
+            const $form = $modal.find('form')[0];
+            if ($form) {
+                // Reset the form fields
+                $form.reset();
+    
+                // Reset the select2 values
+                $modal.find('.select2-modal').val(null).trigger('change');
+            }
+        });
+    
+        // Handle Select2
+        $('.select2-modal').each(function() {
+            const $select = $(this);
+            const url = $select.data('url');
+            const width = $select.data('width') || ($select.hasClass('w-100') ? '100%' : 'resolve');
+            const placeholder = $select.data('placeholder') || 'Select Option';
+            const multiple = $select.data('multiple') === true || $select.data('multiple') === 'true';
+            const closeOnSelect = !multiple;
+    
+            // Initialize Select2 with custom options
+            $select.select2({
+                theme: 'bootstrap-5',
+                width: width,
+                placeholder: placeholder,
+                dropdownParent: $select.closest('.modal'), // Ensure dropdown is within modal
+                multiple: multiple,
+                closeOnSelect: closeOnSelect,
+                allowClear: true,
+                ajax: url ? {
+                    url: url,
+                    dataType: 'json',
+                    delay: 250, // Delay for search queries
+                    data: function(params) {
+                        return {
+                            q: params.term
+                        }; // Query parameter for search term
+                    },
+                    processResults: function(data) {
+                        // Map the results to the format Select2 expects
+                        return {
+                            results: data.map(item => ({
                                 id: item.id,
                                 text: item.name
-                            };
-                        })
-                    };
-                },
-                cache: true
-            };
-        }
-
-        select.select2(config);
+                            }))
+                        };
+                    },
+                    cache: true // Cache results for performance
+                } : null
+            });
+        });
     });
 </script>
 @stack('scripts')
