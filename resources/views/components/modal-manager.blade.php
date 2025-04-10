@@ -2,14 +2,14 @@
 @if ($listModal)
     <div class="modal fade" id="listModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="listModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="listModalLabel">List Data</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-start">
-                    {{-- TODO: Create List Modal --}}
+                    <x-table-datatable id="list-products-table" :columns="['#', 'Name', 'Price', 'Description', 'Action']" :darkThead="false" />
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -63,12 +63,3 @@
         </div>
     </div>
 @endif
-
-@push('scripts')
-    <script>
-        // Handle ListModal
-        $(document).on('click', '.list-btn', function() {
-            $('#listModal').modal('show');
-        });
-    </script>
-@endpush

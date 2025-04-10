@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Utils\CurrencyFormatter;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use App\View\Components\TableActions;
@@ -127,5 +128,31 @@ class CategoryController extends Controller
             ->get();
 
         return response()->json($categories);
+    }
+
+    public function products($id)
+    {
+        $category = Category::find($id);
+
+        return DataTables::of($category->products)
+            ->addIndexColumn()
+            ->editColumn('price', function ($row) {
+                return CurrencyFormatter::formatRupiah($row->price);
+            })
+            ->editColumn('description', function ($row) {
+                if ($row->description) {
+                    return $row->description;
+                } else {
+                    return '<span class="text-secondary"><i><small>No description</small></i></span>';
+                }
+            })
+            ->addColumn('action', function ($row) {
+                return (new TableActions(
+                    id: $row->id,
+                    editButton: true,
+                    deleteButton: true
+                ))->render();
+            })
+            ->make(true);
     }
 }

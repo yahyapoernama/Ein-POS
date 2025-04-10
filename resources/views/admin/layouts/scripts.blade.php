@@ -175,47 +175,70 @@
                 }
             });
         });
-    });
 
-    // Reset form when modal closed
-    $('.modal').on('hidden.bs.modal', function() {
-        $(this).find('form')[0].reset();
-        $(this).find('.select2-modal').val(null).trigger('change');
-    });
-
-    // Handle Select2
-    $('.select2-modal').each(function() {
-        let select = $(this);
-        let url = select.data('url');
-        let width = select.data('width') || (select.hasClass('w-100') ? '100%' : 'resolve');
-        let placeholder = select.data('placeholder') || 'Select Option';
-        let multiple = select.data('multiple') === true || select.data('multiple') === 'true';
-        let closeOnSelect = !multiple;
-
-        let config = {
-            theme: "bootstrap-5",
-            width: width,
-            placeholder: placeholder,
-            dropdownParent: select.closest('.modal'), // Agar tidak keluar dari modal
-            multiple: multiple,
-            closeOnSelect: closeOnSelect,
-            allowClear: true,
-        };
-
-        if (url) {
-            config.ajax = {
-                url: url,
-                dataType: 'json',
-                delay: 250,
-                data: function(params) {
-                    return {
-                        q: params.term
-                    };
-                },
-                processResults: function(data) {
-                    return {
-                        results: $.map(data, function(item) {
-                            return {
+        // Handle ListModal
+        $(document).on('click', '.list-btn', function() {
+            const id = $(this).data('id');
+            const url = window.location.href + '/utils/' + id + '/products';
+    
+            let $icon = $(this).find('i');
+            $icon.removeClass('ti-database').addClass('ti-loader ti-spin');
+    
+            $('#list-products-table').on('draw.dt', function() {
+                $icon.removeClass('ti-loader ti-spin').addClass('ti-database');
+            });
+    
+            if ($.fn.DataTable.isDataTable('#list-products-table')) {
+                $('#list-products-table').DataTable().ajax.url(url).load(); // reload
+            } else {
+                $('#list-products-table').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    ajax: {
+                        url: url,
+                        type: 'GET'
+                    },
+                    columns: [{
+                            data: 'DT_RowIndex',
+                            name: 'DT_RowIndex',
+                            className: 'text-center',
+                            width: '5%',
+                            orderable: false,
+                            searchable: false
+                        },
+                        {
+                            data: 'name',
+                            name: 'name'
+                        },
+                        {
+                            data: 'price',
+                            name: 'price'
+                        },
+                        {
+                            data: 'description',
+                            name: 'description'
+                        },
+                        {
+                            data: 'action',
+                            name: 'action',
+                            width: '15%',
+                            className: 'text-center',
+                            orderable: false,
+                            searchable: false
+                        },
+                    ],
+                    order: [
+                        [1, 'asc']
+                    ],
+                    initComplete: function(settings, json) {
+                        $('#listModal').modal('show');
+                    },
+                    drawCallback: function(settings) {
+                        $('#listModal').modal('show');
+                    }
+                });
+            }
+        });
                                 id: item.id,
                                 text: item.name
                             };

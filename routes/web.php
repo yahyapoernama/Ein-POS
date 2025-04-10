@@ -21,6 +21,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('utils')->name('utils.')->group(function () {
             Route::get('/get-data', [CategoryController::class, 'getData'])->name('getData');
             Route::get('/select2', [CategoryController::class, 'select2'])->name('select2');
+            Route::get('/{id}/products', [CategoryController::class, 'products'])->name('products');
         });
     });
 });
