@@ -34,7 +34,7 @@
         padding-top: 0 !important;
     }
 
-    thead>tr>th {
+    thead.thead-dark>tr>th {
         font-weight: bold !important;
         color: white !important;
         background-color: #343A40 !important;
