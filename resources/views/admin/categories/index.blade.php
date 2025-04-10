@@ -23,17 +23,7 @@
                             <i class="ti ti-refresh me-2"></i> <span class="align-middle">Reload Table</span>
                         </button>
                     </div>
-                    <table class="table table-bordered datatable" id="categories-table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Name</th>
-                                <th>Slug</th>
-                                <th>Description</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                    </table>
+                    <x-table-datatable id="categories-table" :columns="['#', 'Name', 'Slug', 'Description', 'Action']" />
                 </div>
             </div>
         </div>
