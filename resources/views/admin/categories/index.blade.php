@@ -42,11 +42,11 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="name" class="form-label">Name</label>
-                            <input type="text" class="form-control" id="name" name="name" required>
+                            <input type="text" class="form-control" id="name" name="name" placeholder="Category Name" required>
                         </div>
                         <div class="mb-3">
                             <label for="slug" class="form-label">Slug</label>
-                            <input type="text" class="form-control" id="slug" name="slug" required>
+                            <input type="text" class="form-control" id="slug" name="slug" placeholder="Category Slug" required>
                         </div>
                     </div>
                     <div class="modal-footer">
