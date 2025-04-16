@@ -97,8 +97,69 @@
         box-shadow: none;
     }
 
-    /* div.dt-processing {
+    div.dt-processing>div {
         display: none !important;
-    } */
+        /* background: #343A40 !important; */
+    }
+
+    /* Spinner Style */
+    .dt-processing::before {
+        content: "";
+        display: block;
+        width: 50px;
+        height: 50px;
+        margin: 25px auto 10px auto;
+        border: 5px solid #343A40;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: dt-spinner 1s linear infinite;
+    }
+
+    @keyframes dt-spinner {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .dt-processing::after {
+        content: "Loading...";
+        display: block;
+        text-align: center;
+        color: #343A40;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 20px;
+    }
+
+    .datatable-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background-color: rgba(255, 255, 255, 0.6);
+        /* semi-transparent */
+        width: 100%;
+        height: 100%;
+        z-index: 10;
+
+        /* Animation */
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        pointer-events: none;
+        /* optional: to prevent clicking while loading */
+    }
+
+    .datatable-wrapper.processing .datatable-overlay {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .datatable-wrapper.processing table {
+        filter: blur(1px);
+    }
 </style>
 @stack('styles')

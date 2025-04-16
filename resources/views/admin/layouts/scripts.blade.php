@@ -25,8 +25,12 @@
         $(document).on('click', '#reloadTable', function() {
             let $reloadBtnIcon = $('#reloadTable').find('i');
             $reloadBtnIcon.addClass('ti-spin');
-            $('.datatable').DataTable().ajax.reload(function() {
-                $reloadBtnIcon.removeClass('ti-spin');
+            $('.datatable').each(function() {
+                if (!$(this).is('#list-products-table')) {
+                    $(this).DataTable().ajax.reload(function() {
+                        $reloadBtnIcon.removeClass('ti-spin');
+                    });
+                }
             });
         });
 
@@ -47,14 +51,16 @@
                 success: function(response) {
                     $btn.text($btnText);
                     if (response.success) {
+                        Swal.fire("Success!", response.message, "success");
                         $('#createModal').modal('hide');
                         $('.datatable').DataTable().ajax.reload();
-                        Swal.fire("Success!", response.message, "success");
                     } else {
                         Swal.fire("Oops!", response.message, "error");
                     }
                 },
-                error: function() {
+                error: function(e) {
+                    console.log(e);
+                    Swal.fire("Oops!", "An error occurred", "error");
                     $btn.text($btnText);
                 }
             });
@@ -72,7 +78,15 @@
             const id = $button.data('id');
 
             // Construct the edit URL
-            const url = `${window.location.href}/${id}/edit`;
+            let editUrl;
+            if ($button.data('url') !== null && $button.data('url') !== '') {
+                editUrl = $button.data('url');
+                customForm = true;
+            } else {
+                editUrl = `${window.location.href}/${id}/edit`;
+                customForm = false;
+            }
+            const url = editUrl;
 
             // Show the loading icon
             $icon.removeClass('ti-edit').addClass('ti-loader ti-spin');
@@ -105,33 +119,69 @@
                         return;
                     }
 
-                    // Show the edit modal
-                    $('#editModal').modal('show');
+                    if (customForm) {
+                        // Set the ID to the form
+                        $('#edit-' + $button.data('model') + '-form').data('id', data.id);
 
-                    // Reset the edit form
-                    $('.edit-form')[0].reset();
+                        // Show the edit modal
+                        $('#edit' + $button.data('model').replace(/^./, m => m.toUpperCase()) + 'Modal').modal('show');
 
-                    // Set the ID to the form
-                    $('.edit-form').data('id', data.id);
+                        // Reset the edit form
+                        $('#edit-' + $button.data('model') + '-form')[0].reset();
 
-                    // Fill the form fields with the data
-                    Object.entries(data).forEach(([key, value]) => {
-                        if (Array.isArray(value)) {
-                            // Select the items in the select2
-                            const select = $('.edit-form').find(`select[name="${key}[]"]`);
-                            value.forEach((item) =>
-                                select.select2("trigger", "select", {
-                                    data: {
-                                        id: item.id,
-                                        text: item.name
-                                    },
-                                })
-                            );
-                        } else {
-                            // Set the value of the input field
-                            $('.edit-form').find(`input[name="${key}"]`).val(value);
-                        }
-                    });
+                        // Set the ID to the form
+                        $('#edit-' + $button.data('model') + '-form').data('id', data.id);
+
+                        // Fill the form fields with the data
+                        Object.entries(data).forEach(([key, value]) => {
+                            if (Array.isArray(value)) {
+                                // Select the items in the select2
+                                const select = $('#edit-' + $button.data('model') + '-form').find(`select[name="${key}[]"]`);
+                                value.forEach((item) =>
+                                    select.select2("trigger", "select", {
+                                        data: {
+                                            id: item.id,
+                                            text: item.name
+                                        },
+                                    })
+                                );
+                            } else {
+                                // Set the value of the input field
+                                $('#edit-' + $button.data('model') + '-form').find(`input[name="${key}"]`).val(value);
+                            }
+                        });
+                    } else {
+                        // Set the ID to the form
+                        $('#edit-form').data('id', data.id);
+
+                        // Show the edit modal
+                        $('#editModal').modal('show');
+    
+                        // Reset the edit form
+                        $('.edit-form')[0].reset();
+    
+                        // Set the ID to the form
+                        $('.edit-form').data('id', data.id);
+    
+                        // Fill the form fields with the data
+                        Object.entries(data).forEach(([key, value]) => {
+                            if (Array.isArray(value)) {
+                                // Select the items in the select2
+                                const select = $('.edit-form').find(`select[name="${key}[]"]`);
+                                value.forEach((item) =>
+                                    select.select2("trigger", "select", {
+                                        data: {
+                                            id: item.id,
+                                            text: item.name
+                                        },
+                                    })
+                                );
+                            } else {
+                                // Set the value of the input field
+                                $('.edit-form').find(`input[name="${key}"]`).val(value);
+                            }
+                        });
+                    }
                 })
                 .fail((xhr, status, error) => {
                     // Hide the loading icon
@@ -167,9 +217,10 @@
                     $('#editModal').modal('hide');
                     $('.datatable').DataTable().ajax.reload();
                 },
-                error: function() {
+                error: function(xhr, status, error) {
                     $btn.text($btnText);
-                    Swal.fire("Oops!", "An error occurred", "error");
+                    const errorMessage = xhr.responseJSON ? xhr.responseJSON.message : "An error occurred";
+                    Swal.fire("Oops!", errorMessage, "error");
                 }
             });
         });
@@ -217,14 +268,14 @@
         $(document).on('click', '.list-btn', function() {
             const id = $(this).data('id');
             const url = window.location.href + '/utils/' + id + '/products';
-    
+
             let $icon = $(this).find('i');
             $icon.removeClass('ti-database').addClass('ti-loader ti-spin');
-    
+
             $('#list-products-table').on('draw.dt', function() {
                 $icon.removeClass('ti-loader ti-spin').addClass('ti-database');
             });
-    
+
             if ($.fn.DataTable.isDataTable('#list-products-table')) {
                 $('#list-products-table').DataTable().ajax.url(url).load(); // reload
             } else {
@@ -276,7 +327,16 @@
                 });
             }
         });
-    
+
+        $(document).on('show.bs.modal', '.modal', function(event) {
+            var zIndex = 1040 + (10 * $('.modal:visible').length);
+            $(this).css('z-index', zIndex);
+            setTimeout(function() {
+                $('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass(
+                    'modal-stack');
+            }, 0);
+        });
+
         // Reset form when modal is closed
         // This event is triggered when the modal is closed. We need to reset the form
         // so that the values are cleared and the select2 is reset.
@@ -286,12 +346,12 @@
             if ($form) {
                 // Reset the form fields
                 $form.reset();
-    
+
                 // Reset the select2 values
                 $modal.find('.select2-modal').val(null).trigger('change');
             }
         });
-    
+
         // Handle Select2
         $('.select2-modal').each(function() {
             const $select = $(this);
@@ -300,7 +360,7 @@
             const placeholder = $select.data('placeholder') || 'Select Option';
             const multiple = $select.data('multiple') === true || $select.data('multiple') === 'true';
             const closeOnSelect = !multiple;
-    
+
             // Initialize Select2 with custom options
             $select.select2({
                 theme: 'bootstrap-5',

@@ -12,7 +12,7 @@
     @endif
 
     @if ($editButton)
-        <button type="button" class="btn btn-sm btn-warning edit-btn mx-1" data-id="{{ $id }}">
+        <button type="button" class="btn btn-sm btn-warning edit-btn mx-1" data-id="{{ $id }}" data-url="{{ $editUrl }}" data-model="{{ $model }}">
             <i class="ti ti-edit"></i>
         </button>
     @endif

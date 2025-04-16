@@ -2,33 +2,42 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Traits\ValidationRules\CategoryValidationRules;
 use App\Models\Category;
 use App\Utils\CurrencyFormatter;
-use Illuminate\Http\Request;
-use Yajra\DataTables\Facades\DataTables;
 use App\View\Components\TableActions;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
+use Yajra\DataTables\Facades\DataTables;
 
 class CategoryController extends Controller
 {
+    use CategoryValidationRules;
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
         return view('admin.categories.index');
     }
 
+    /**
+     * Get data for DataTables.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getData()
     {
-        $data = Category::select('*');
-
-        return DataTables::of($data)
+        return DataTables::of(Category::select(['id', 'name', 'slug', 'description']))
             ->addIndexColumn()
-            ->addColumn('action', function ($row) {
-                $productCount = $row->products()->count();
+            ->addColumn('action', function ($category) {
                 return (new TableActions(
-                    id: $row->id,
+                    id: $category->id,
                     listButton: true,
-                    listCount: $productCount,
+                    listCount: $category->products()->count(),
                     editButton: true,
                     deleteButton: true
                 ))->render();
@@ -36,60 +45,79 @@ class CategoryController extends Controller
             ->toJson();
     }
 
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(Request $request)
     {
         try {
             DB::beginTransaction();
 
-            $request->validate([
-                'name' => ['required', Rule::unique('categories')->whereNull('deleted_at')],
-                'slug' => ['required', Rule::unique('categories')->whereNull('deleted_at')],
-            ]);
-
-            Category::create([
-                'name' => $request->name,
-                'slug' => $request->slug,
-                'description' => $request->description
-            ]);
+            Category::create($request->validate($this->storeRules()));
 
             DB::commit();
 
             return response()->json(['success' => true, 'message' => 'Category created successfully']);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
 
-    public function show($id)
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(int $id)
     {
-        $category = Category::find($id);
-
-        return response()->json(['success' => true, 'data' => $category]);
+        return response()->json(['success' => true, 'data' => Category::findOrFail($id)]);
     }
 
-    public function edit($id)
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function edit(int $id)
     {
-        $category = Category::find($id);
-
-        return response()->json(['success' => true, 'data' => $category]);
+        return response()->json(['success' => true, 'data' => Category::findOrFail($id)]);
     }
 
-    public function update(Request $request, $id)
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, int $id)
     {
         try {
             DB::beginTransaction();
 
-            $request->validate([
-                'name' => ['required', Rule::unique('categories')->whereNull('deleted_at')->ignore($id, 'id')],
-                'slug' => ['required', Rule::unique('categories')->whereNull('deleted_at')->ignore($id, 'id')],
-            ]);
+            // Retrieve the category from the database
+            $category = Category::findOrFail($id);
 
-            $category = Category::find($id);
-            $category->name = $request->name;
-            $category->slug = $request->slug;
-            $category->description = $request->description;
-            $category->save();
+            // Validate using update rules
+            $request->validate($this->updateRules($id));
+
+            // Define the fields to check for changes
+            $fields = ['name', 'slug', 'description'];
+
+            // Check if data has changed
+            if (!$this->hasDataChanged($request, $category, $fields)) {
+                return $this->noChangeResponse();
+            }
+
+            // Proceed with the update if data has changed
+            $category->update($request->only($fields));
 
             DB::commit();
 
@@ -97,17 +125,22 @@ class CategoryController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 400);
         }
     }
 
-    public function destroy($id)
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy(int $id)
     {
         try {
             DB::beginTransaction();
 
-            $category = Category::find($id);
-            $category->delete();
+            Category::findOrFail($id)->delete();
 
             DB::commit();
 
@@ -115,41 +148,52 @@ class CategoryController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
 
+    /**
+     * Get data for Select2 plugin.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function select2(Request $request)
     {
         $query = $request->get('q');
-        $categories = Category::where('name', 'ilike', '%' . $query . '%')
-            ->orWhere('slug', 'ilike', '%' . $query . '%')
-            ->select('id', 'name')
-            ->get();
 
-        return response()->json($categories);
+        return response()->json(Category::select('id', 'name')
+            ->where('name', 'ilike', '%' . $query . '%')
+            ->orWhere('slug', 'ilike', '%' . $query . '%')
+            ->get());
     }
 
-    public function products($id)
+    /**
+     * Get data for DataTables of products related to the category.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function products(int $id)
     {
-        $category = Category::find($id);
-
-        return DataTables::of($category->products)
+        return DataTables::of(Category::findOrFail($id)->products)
             ->addIndexColumn()
-            ->editColumn('price', function ($row) {
-                return CurrencyFormatter::formatRupiah($row->price);
+            ->editColumn('price', function ($product) {
+                return CurrencyFormatter::formatRupiah($product->price);
             })
-            ->editColumn('description', function ($row) {
-                if ($row->description) {
-                    return $row->description;
+            ->editColumn('description', function ($product) {
+                if ($product->description) {
+                    return $product->description;
                 } else {
                     return '<span class="text-secondary"><i><small>No description</small></i></span>';
                 }
             })
-            ->addColumn('action', function ($row) {
+            ->addColumn('action', function ($product) {
                 return (new TableActions(
-                    id: $row->id,
+                    id: $product->id,
+                    model: 'product',
                     editButton: true,
+                    editUrl: route('admin.products.edit', $product->id),
                     deleteButton: true
                 ))->render();
             })

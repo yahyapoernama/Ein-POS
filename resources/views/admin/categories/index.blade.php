@@ -42,11 +42,13 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="name" class="form-label">Name</label>
-                            <input type="text" class="form-control" id="name" name="name" placeholder="Category Name" required>
+                            <input type="text" class="form-control" id="name" name="name"
+                                placeholder="Category Name" required>
                         </div>
                         <div class="mb-3">
                             <label for="slug" class="form-label">Slug</label>
-                            <input type="text" class="form-control" id="slug" name="slug" placeholder="Category Slug" required>
+                            <input type="text" class="form-control" id="slug" name="slug"
+                                placeholder="Category Slug" required>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -58,13 +60,34 @@
         </div>
     </div>
 
-    <x-modal-manager :listModal="true" :editModal="true" :editFields="['name', 'slug']" />
+    {{-- <x-modal-manager :listModal="true" :editModal="true" :editFields="['name', 'slug']" /> --}}
+    <x-modal-wrapper id="listModal" title="List Data" :size="'xl'">
+        <x-table-datatable id="list-products-table" :columns="['#', 'Name', 'Price', 'Description', 'Action']" :darkThead="false" />
+    </x-modal-wrapper>
+    <x-modal-wrapper id="editModal" title="Edit Data" :wrapBody="false">
+        <x-form-builder :formId="'edit-form'" :model="'Category'" :fields="['name', 'slug']" method="PUT" :withModal="true" />
+    </x-modal-wrapper>
+    <x-modal-wrapper id="editProductModal" title="Edit Data" :wrapBody="false">
+        <x-form-builder :formId="'edit-product-form'" :model="'Product'" :fields="[
+            'name',
+            'price',
+            [
+                'name' => 'categories',
+                'select2' => [
+                    'multiple' => 'true',
+                    'placeholder' => 'Select Category',
+                    'url' => route('admin.categories.utils.select2'),
+                ],
+            ],
+            'description',
+        ]" method="PUT" :withModal="true" />
+    </x-modal-wrapper>
 @endsection
 
 @push('scripts')
     <script>
         $(function() {
-            $('#categories-table').DataTable({
+            const table = $('#categories-table').DataTable({
                 processing: true,
                 serverSide: true,
                 ordering: true,
@@ -109,6 +132,11 @@
                 order: [
                     [1, 'asc']
                 ],
+            });
+
+            table.on('processing.dt', function(e, settings, processing) {
+                const wrapper = $(this).closest('.datatable-wrapper');
+                wrapper.toggleClass('processing', processing);
             });
         });
     </script>
