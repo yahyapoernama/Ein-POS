@@ -25,7 +25,7 @@
         $(document).on('click', '#reloadTable', function() {
             let $reloadBtnIcon = $('#reloadTable').find('i');
             $reloadBtnIcon.addClass('ti-spin');
-            $('.datatable').each(function() {
+            $('.main-table').each(function() {
                 if (!$(this).is('#list-products-table')) {
                     $(this).DataTable().ajax.reload(function() {
                         $reloadBtnIcon.removeClass('ti-spin');
@@ -59,7 +59,6 @@
                     }
                 },
                 error: function(e) {
-                    console.log(e);
                     Swal.fire("Oops!", "An error occurred", "error");
                     $btn.text($btnText);
                 }
