@@ -30,37 +30,9 @@
         <!-- [ sample-page ] end -->
     </div>
 
-    <div class="modal fade" id="createModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-        aria-labelledby="createModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="createModalLabel">Add Data</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form class="create-form" enctype="multipart/form-data" method="POST" spellcheck="false">
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Name</label>
-                            <input type="text" class="form-control" id="name" name="name"
-                                placeholder="Category Name" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="slug" class="form-label">Slug</label>
-                            <input type="text" class="form-control" id="slug" name="slug"
-                                placeholder="Category Slug" required>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-success">Save</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    {{-- <x-modal-manager :listModal="true" :editModal="true" :editFields="['name', 'slug']" /> --}}
+    <x-modal-wrapper id="createModal" title="Add Data" :wrapBody="false">
+        <x-form-builder :formId="'create-form'" :model="'Category'" :fields="['name', 'slug']" method="POST" :withModal="true" />
+    </x-modal-wrapper>
     <x-modal-wrapper id="listModal" title="List Data" :size="'xl'">
         <x-table-datatable id="list-products-table" :columns="['#', 'Name', 'Price', 'Description', 'Action']" :darkThead="false" />
     </x-modal-wrapper>

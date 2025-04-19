@@ -50,17 +50,15 @@
                 data: data,
                 success: function(response) {
                     $btn.text($btnText);
-                    if (response.success) {
-                        Swal.fire("Success!", response.message, "success");
-                        $('#createModal').modal('hide');
-                        $('.datatable').DataTable().ajax.reload();
-                    } else {
-                        Swal.fire("Oops!", response.message, "error");
-                    }
+                    Swal.fire("Success!", response.message, "success");
+                    $('#createModal').modal('hide');
+                    $('.main-table').DataTable().ajax.reload();
                 },
                 error: function(e) {
-                    Swal.fire("Oops!", "An error occurred", "error");
                     $btn.text($btnText);
+                    const errorMessage = xhr.responseJSON ? xhr.responseJSON.message :
+                        "An error occurred";
+                    Swal.fire("Oops!", errorMessage, "error");
                 }
             });
         });
@@ -99,13 +97,6 @@
                     // Hide the loading icon
                     $icon.removeClass('ti-loader ti-spin').addClass('ti-edit');
 
-                    // Check if the response is valid
-                    if (!response.success) {
-                        // Show the error message
-                        Swal.fire("Oops!", response.message, "error");
-                        return;
-                    }
-
                     // Get the data from the response
                     const {
                         data
@@ -123,7 +114,8 @@
                         $('#edit-' + $button.data('model') + '-form').data('id', data.id);
 
                         // Show the edit modal
-                        $('#edit' + $button.data('model').replace(/^./, m => m.toUpperCase()) + 'Modal').modal('show');
+                        $('#edit' + $button.data('model').replace(/^./, m => m.toUpperCase()) +
+                            'Modal').modal('show');
 
                         // Reset the edit form
                         $('#edit-' + $button.data('model') + '-form')[0].reset();
@@ -135,7 +127,8 @@
                         Object.entries(data).forEach(([key, value]) => {
                             if (Array.isArray(value)) {
                                 // Select the items in the select2
-                                const select = $('#edit-' + $button.data('model') + '-form').find(`select[name="${key}[]"]`);
+                                const select = $('#edit-' + $button.data('model') + '-form')
+                                    .find(`select[name="${key}[]"]`);
                                 value.forEach((item) =>
                                     select.select2("trigger", "select", {
                                         data: {
@@ -146,7 +139,8 @@
                                 );
                             } else {
                                 // Set the value of the input field
-                                $('#edit-' + $button.data('model') + '-form').find(`input[name="${key}"]`).val(value);
+                                $('#edit-' + $button.data('model') + '-form').find(
+                                    `input[name="${key}"]`).val(value);
                             }
                         });
                     } else {
@@ -155,18 +149,19 @@
 
                         // Show the edit modal
                         $('#editModal').modal('show');
-    
+
                         // Reset the edit form
                         $('.edit-form')[0].reset();
-    
+
                         // Set the ID to the form
                         $('.edit-form').data('id', data.id);
-    
+
                         // Fill the form fields with the data
                         Object.entries(data).forEach(([key, value]) => {
                             if (Array.isArray(value)) {
                                 // Select the items in the select2
-                                const select = $('.edit-form').find(`select[name="${key}[]"]`);
+                                const select = $('.edit-form').find(
+                                    `select[name="${key}[]"]`);
                                 value.forEach((item) =>
                                     select.select2("trigger", "select", {
                                         data: {
@@ -187,7 +182,7 @@
                     $icon.removeClass('ti-loader ti-spin').addClass('ti-edit');
 
                     // Show the error message
-                    const errorMessage = `${xhr.status} ${xhr.statusText}`;
+                    let errorMessage = `${xhr.status} ${xhr.statusText}`;
                     if (xhr.responseJSON) {
                         errorMessage += `: ${xhr.responseJSON.message}`;
                     }
@@ -214,11 +209,12 @@
                     $btn.text($btnText);
                     Swal.fire("Updated!", response.message, "success");
                     $('#editModal').modal('hide');
-                    $('.datatable').DataTable().ajax.reload();
+                    $('.main-table').DataTable().ajax.reload();
                 },
                 error: function(xhr, status, error) {
                     $btn.text($btnText);
-                    const errorMessage = xhr.responseJSON ? xhr.responseJSON.message : "An error occurred";
+                    const errorMessage = xhr.responseJSON ? xhr.responseJSON.message :
+                        "An error occurred";
                     Swal.fire("Oops!", errorMessage, "error");
                 }
             });
@@ -253,10 +249,12 @@
                         type: "DELETE",
                         success: function(response) {
                             Swal.fire("Deleted!", response.message, "success");
-                            $('.datatable').DataTable().ajax.reload();
+                            $('.main-table').DataTable().ajax.reload();
                         },
                         error: function() {
-                            Swal.fire("Oops!", "An error occurred", "error");
+                            const errorMessage = xhr.responseJSON ? xhr.responseJSON
+                                .message : "An error occurred";
+                            Swal.fire("Oops!", errorMessage, "error");
                         }
                     });
                 }

@@ -9,7 +9,8 @@
     };
 @endphp
 
-<form action="{{ $action }}" method="POST" id="{{ $formId }}" class="{{ $formId }}">
+<form action="{{ $action }}" method="{{ $method }}" id="{{ $formId }}" class="{{ $formId }}"
+    enctype="multipart/form-data" spellcheck="false">
     @csrf
     @if (in_array($method, ['PUT', 'PATCH', 'DELETE']))
         @method($method)
