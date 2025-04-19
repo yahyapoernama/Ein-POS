@@ -161,5 +161,18 @@
     .datatable-wrapper.processing table {
         filter: blur(1px);
     }
+
+
+    .page-link {
+        color: #6c757d;
+    }
+
+    .page-link:hover {
+        color: #343A40;
+    }
+
+    .active>.page-link:hover {
+        color: white !important;
+    }
 </style>
 @stack('styles')
